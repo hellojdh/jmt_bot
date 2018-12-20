@@ -15,7 +15,7 @@ from selenium import webdriver
 
 app = Flask(__name__)
 
-slack_token = "xoxb-505014660117-508577167127-9lJWXGy2RIPsgUN14fX2SIaR"
+slack_token = "xoxb-505014660117-508577167127-0gEtMIGXTKFF9et7TV8qjp6R"
 slack_client_id = "505014660117.506786567440"
 slack_client_secret = "db81f21ec23e297e1a3599888364613f"
 slack_verification = "QNPqdNdhznxTZhljh7WYac7w"
@@ -58,7 +58,6 @@ def _get_animal_info(channel):
         animal_img = prev_url+soup.find('img')['src']
         driver.close()
         _send_message(channel,"동물이름이 선택되었습니다!! 그림을 고르는 중입니다.")
-        _send_message(channel,"이상할 경우 통과를 말해주세요")
 
         # 얻은 영어 동물이름을 바탕으로 한글로 바꾸기
         # tlid-translation translation
@@ -133,12 +132,12 @@ def _end_animal_game(channel):
 
 # 챗봇이 메시지를 보내게하는 함수
 def _send_message(channel,keywords,attachment=[]):
-        sc.api_call(
-            "chat.postMessage",
-            channel=channel,
-            text=keywords,
-            attachments = attachment
-        )
+    sc.api_call(
+        "chat.postMessage",
+        channel=channel,
+        text=keywords,
+        attachments = attachment
+    )
 # _send_message가 길어지지 않게 이미지 만들기 
 def _make_image(title,image_url):
     result = [{"title":title,"image_url":image_url}]
@@ -295,11 +294,13 @@ def _event_handler(event_type, slack_event):
         # 유저명을 제외한 메시지 내용 뽑아오기
         keywords = text.split()[1:]
         print(keywords)
-        
+        print(status_animal_game)
+        print(status_num_game)
+        print(status_word_game)
         if keywords[0] == "종료":
             on_off_game()
             _send_message(channel,"게임이 종료되었습니다")
-            return
+            return make_response("App mention message has been sent", 200,{"X-Slack-No-Retry": 1})
 
         # 게임 진행
         if status_animal_game:
