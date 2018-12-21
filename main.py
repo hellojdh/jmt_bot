@@ -239,18 +239,30 @@ def _game3(channel,text):
         _send_message(channel,"틀렸습니다 ㅠㅠ",_make_image("1","https://static1.squarespace.com/static/5a0226406f4ca352ad5d7352/t/5a029fb553450a47e3005ba9/1518507181501/?format=1500w"))
         on_off_game()
         return
-    tmp = word[len(word)-1:]
-    url = "https://www.wordrow.kr/%EC%8B%9C%EC%9E%91%ED%95%98%EB%8A%94-%EB%A7%90/" + parse.quote(str(tmp))
+    try:
+        tmp = word[len(word)-1:]
+        url = "https://www.wordrow.kr/%EC%8B%9C%EC%9E%91%ED%95%98%EB%8A%94-%EB%A7%90/" + parse.quote(str(tmp))
 
-    html = urllib.request.urlopen(url).read()
-    soup = BeautifulSoup(html,'html.parser')
-    word_list= [] #단어들 저장
+        html = urllib.request.urlopen(url).read()
+        soup = BeautifulSoup(html,'html.parser')
+        word_list= [] #단어들 저장
     
-    for each in soup.find_all("h3",class_="card-caption")[:20]: #모든 글자
-        word = each.find("a")["href"][4:]
-        if " " not in word:
-            if len(word)>1: #1자리수 버려
-                word_list.append(re.sub("[하다]","",word))
+
+        for each in soup.find_all("h3",class_="card-caption")[:20]: #모든 글자
+            word = each.find("a")["href"][4:]
+            if " " not in word:
+                if len(word)>1: #1자리수 버려
+                    word_list.append(re.sub("[하다]","",word))
+    except:
+        on_off_game()
+        _send_message(channel,"승리하셨습니다!!!",_make_image("축하합니다!!!",happy_img[random.randrange(0,4)]))
+        return
+    
+    if len(word_list) == 0:
+        on_off_game()
+        _send_message(channel,"승리하셨습니다!!!",_make_image("축하합니다!!!",happy_img[random.randrange(0,5)]))
+        return
+
             
     print("::::  "+str(word_list))
     choice_word = word_list[random.randrange(0,len(word_list))]
