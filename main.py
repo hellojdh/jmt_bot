@@ -15,7 +15,7 @@ from selenium import webdriver
 
 app = Flask(__name__)
 
-slack_token = "xoxb-505014660117-508577167127-0gEtMIGXTKFF9et7TV8qjp6R"
+slack_token = "xoxb-505014660117-508577167127-ihpTOlmQCsr99i1HbPhCQcgT"
 slack_client_id = "505014660117.506786567440"
 slack_client_secret = "db81f21ec23e297e1a3599888364613f"
 slack_verification = "QNPqdNdhznxTZhljh7WYac7w"
@@ -71,6 +71,8 @@ def _get_animal_info(channel):
         # 영어를 해석한 이름이 없을 경우 다시 이름 고르기
         try:
             animal_name = soup.find('div',class_="gsmt kno-ecr-pt kno-fb-ctx").get_text().split()[0]
+            if animal_name=="":
+                continue
             break
         except:
             _send_message(channel,"저의 천부적인 능력으로도 초성 이름을 맞출수 없어서 다시 고르는 중입니다.")
@@ -115,10 +117,14 @@ def _start_animal_game(channel,keywords):
                 animal_chance-=1
                 _send_message(channel,"틀렸습니다. 남은 기회 :: "+str(animal_chance))
                 try:
-                    if animal_chance==3:
-                        _send_message(channel,"힌트 :: "+animal_name[0]+animal_chosung[1:])
-                    elif animal_chance==2:
-                        _send_message(channel,"힌트 :: "+animal_name[:2]+animal_chosung[2:])
+                    if animal_chance==2:
+                        if len(animal_name)!=1:
+                            _send_message(channel,"힌트 :: "+animal_name[0]+animal_chosung[1:])
+                    elif animal_chance==1:
+                        if len(animal_name)!=2:
+                            _send_message(channel,"힌트 :: "+animal_name[:2]+animal_chosung[2:])
+                        elif len(animal_name)!=1:
+                            _send_message(channel,"힌트 :: "+animal_name[0]+animal_chosung[1:])
                 except:
                     pass
 #[{"title":"Goat","image_url":image}]
