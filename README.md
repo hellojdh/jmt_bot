@@ -20,10 +20,27 @@ jmt_bot은 다음과 같은 미니 게임을 할 수 있습니다.
 동물게임은 [랜덤 동물 싸이트](https://www.randomlists.com/random-animals) 에서 동물을 랜덤하게 뽑습니다.
 
 js를 이용한 랜덤 뽑기를 가져오기위해 selenium을 다음과 같이 사용하였습니다.
-![image](https://user-images.githubusercontent.com/39071991/52345181-e1333500-2a5f-11e9-9299-0e281fa024c8.png)
 
-랜덤 동물 사진과 이름을 가져온 후 검색을 통한 구글 번역을 이용하여 영어로된 동물 이름을 한글로 번역한 뒤, 정규 표현식을 사용하여 변역을 통한 동물 이름에 들어가는 [목,과,류,아과] 같은 대 분류를 제거하였습니다.
-그 후, 얻어온 동물의 한글 이름에서 정규 표현식을 통해 초성을 뽑아내주었습니다.
+```python
+# 동물의 정보를 가져오는 함수
+def _get_animal_info(channel):
+    global status_animal_game
+    global animal_name
+    global animal_chosung
+    while True:
+        url = prev_url+"random-animals?qty=1&show_images=on"
+        driver = webdriver.Chrome("chromedriver.exe")
+        driver.get(url)
+
+        html = driver.page_source
+        soup = BeautifulSoup(html,"html.parser")
+        animal_name = soup.find('div',class_='Rand-stage').get_text()
+        animal_img = prev_url+soup.find('img')['src']
+        driver.close()
+        _send_message(channel,"동물이름이 선택되었습니다!! 그림을 고르는 중입니다.")
+```
+
+랜덤 동물 사진과 이름을 가져온 후 검색을 통한 구글 번역을 이용하여 영어로된 동물 이름을 한글로 번역한 뒤, 정규 표현식을 사용하여 변역을 통한 동물 이름에 들어가는 [목,과,류,아과] 같은 대 분류를 제거하였습니다. 그 후, 얻어온 동물의 한글 이름에서 정규 표현식을 통해 초성을 뽑아내주었습니다.
 
 ![image](https://user-images.githubusercontent.com/39071991/52344531-57cf3300-2a5e-11e9-9215-87e083171cf7.png)
 
@@ -37,11 +54,38 @@ js를 이용한 랜덤 뽑기를 가져오기위해 selenium을 다음과 같이
 ## 그 외 기능
 1) Bot에 메시지를 보내기 위한 함수를 하나로 통합하여 하나의 함수 호출로 텍스트와 이미지를 Bot이 응답할 수 있도록 함.
 
-![image](https://user-images.githubusercontent.com/39071991/52345869-96b2b800-2a61-11e9-9d2a-70b3a1b3ee44.png)
+```python
+# 챗봇이 메시지를 보내게하는 함수
+def _send_message(channel,keywords,attachment=[]):
+    sc.api_call(
+        "chat.postMessage",
+        channel=channel,
+        text=keywords,
+        attachments = attachment
+    )
+# 이미지 만들기 
+def _make_image(title,image_url):
+    result = [{"title":title,"image_url":image_url}]
+    return result
+```
 
 2) 여러 게임들이 있기 때문에 다중으로 게임이 실행되지 않도록 게임 on_off 함수를 만들어 관리를 함.
 
-![image](https://user-images.githubusercontent.com/39071991/52345812-771b8f80-2a61-11e9-92d8-ac5ae44130c3.png)
+```python
+# 게임이 시작되고 끝날 때 끄고 켜는 함수
+def on_off_game(updown=False,animal=False,word=False):
+    global status_animal_game
+    global status_num_game
+    global status_word_game
+    global tmp_word
+    global check
+    tmp_word = ""
+    check = 1
+
+    status_num_game = updown
+    status_animal_game = animal
+    status_word_game = word
+```
 
 ## Framework
 1) Flask
